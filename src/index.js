@@ -41,7 +41,7 @@ function checkFileExist() {
   } else {
     setTimeout(() => {
       checkFileExist()
-    }, 1 * 1000)
+    }, 1 * 500)
   }
 }
 
