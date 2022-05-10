@@ -9,30 +9,35 @@ const WatchFile = process.argv.length > 2 ? process.argv[2] : DEFAULT_WATCHFILE
 console.log(`Watch: ${WatchFile}`)
 const tail = new Tail(WatchFile)
 
-tail.on('line', (data) => {
-  let matches = data.match(/query\[A\] (\S+) from (\S+)$/)
-  if (matches) {
-    console.log(`Query from ${matches[2]}: ${matches[1]}`)
-  }
+initTailEvents()
 
-  matches = data.match(/config (\S+) is 0.0.0.0/)
-  if (matches) {
-    console.log(`BLOCKED: ${matches[1]}`)
-  }
-})
-
-tail.on('error', (err) => {
-  console.error('tail.error')
-  console.error(err)
-  tail.unwatch()
-  checkFileExist()
-})
+function initTailEvents() {
+  tail.on('line', (data) => {
+    let matches = data.match(/query\[A\] (\S+) from (\S+)$/)
+    if (matches) {
+      console.log(`Query from ${matches[2]}: ${matches[1]}`)
+    }
+  
+    matches = data.match(/config (\S+) is 0.0.0.0/)
+    if (matches) {
+      console.log(`BLOCKED: ${matches[1]}`)
+    }
+  })
+  
+  tail.on('error', (err) => {
+    console.error('tail.error')
+    console.error(err)
+    tail.unwatch()
+    checkFileExist()
+  })
+}
 
 function checkFileExist() {
   console.log(`Monitoring file presence: ${WatchFile}`)
   if (fs.existsSync(WatchFile)) {
     console.log(`File is present: ${WatchFile}`)
     tail.watch()
+    initTailEvents()
   } else {
     setTimeout(() => {
       checkFileExist()
