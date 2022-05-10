@@ -1,0 +1,28 @@
+{
+  "name": "dnsmasq-logparser",
+  "version": "1.0.0",
+  "description": "Parsers realtime logs from dnsmasq",
+  "main": "index.js",
+  "scripts": {
+    "dev": "supervisor -n exit src/index",
+    "dev2": "supervisor -n exit -- src/index ./test/test.log",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhfoo/dnsmasq-logparser.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jhfoo/dnsmasq-logparser/issues"
+  },
+  "homepage": "https://github.com/jhfoo/dnsmasq-logparser#readme",
+  "devDependencies": {
+    "supervisor": "^0.12.0"
+  },
+  "dependencies": {
+    "tail": "^2.2.4"
+  }
+}
