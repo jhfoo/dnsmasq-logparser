@@ -1,7 +1,7 @@
 const Tail = require('tail').Tail
 
 const DEFAULT_WATCHFILE = '/var/log/dnsmasq.log'
-const WatchFile = process.argv.length > 1 ? process.argv[2] : DEFAULT_WATCHFILE
+const WatchFile = process.argv.length > 2 ? process.argv[2] : DEFAULT_WATCHFILE
 
 console.log(`Watch: ${WatchFile}`)
 const tail = new Tail(WatchFile)
