@@ -7,11 +7,11 @@ const DEFAULT_WATCHFILE = '/var/log/dnsmasq.log'
 const WatchFile = process.argv.length > 2 ? process.argv[2] : DEFAULT_WATCHFILE
 
 console.log(`Watch: ${WatchFile}`)
-const tail = new Tail(WatchFile)
+let tail = new Tail(WatchFile)
 
-initTailEvents()
+initTailEvents(tail)
 
-function initTailEvents() {
+function initTailEvents(tail) {
   tail.on('line', (data) => {
     let matches = data.match(/query\[A\] (\S+) from (\S+)$/)
     if (matches) {
@@ -36,8 +36,8 @@ function checkFileExist() {
   console.log(`Monitoring file presence: ${WatchFile}`)
   if (fs.existsSync(WatchFile)) {
     console.log(`File is present: ${WatchFile}`)
-    tail.watch()
-    initTailEvents()
+    tail = new Tail(WatchFile)
+    initTailEvents(tail)
   } else {
     setTimeout(() => {
       checkFileExist()
