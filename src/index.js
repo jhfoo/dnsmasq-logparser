@@ -7,9 +7,14 @@ console.log(`Watch: ${WatchFile}`)
 const tail = new Tail(WatchFile)
 
 tail.on('line', (data) => {
-  const matches = data.match(/query\[A\] (\S+) from (\S+)$/)
+  let matches = data.match(/query\[A\] (\S+) from (\S+)$/)
   if (matches) {
     console.log(`Query from ${matches[2]}: ${matches[1]}`)
+  }
+
+  matches = data.match(/config (\S+) is 0.0.0.0/)
+  if (matches) {
+    console.log(`BLOCKED: ${matches[1]}`)
   }
 })
 
