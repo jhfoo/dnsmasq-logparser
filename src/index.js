@@ -1,4 +1,6 @@
 const ChildProcess = require('child_process'),
+  fs = require('fs'),
+  path = require('path'),
   Tail = require('tail').Tail
 
 const DEFAULT_WATCHFILE = '/var/log/dnsmasq.log'
@@ -22,7 +24,18 @@ tail.on('line', (data) => {
 tail.on('error', (err) => {
   console.error('tail.error')
   console.error(err)
+  checkFileExist()
 })
+
+function checkFileExist() {
+  if (fs.existsSync(WatchFile)) {
+    tail.watch()
+  } else {
+    setTimeout(() => {
+      checkFileExist()
+    }, 500)
+  }
+}
 
 setTimeout(async () => {
   await clearLog()
