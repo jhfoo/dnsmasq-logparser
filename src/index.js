@@ -26,14 +26,18 @@ tail.on('error', (err) => {
 
 setTimeout(async () => {
   await clearLog()
-}, 5 * 60 + Math.floor(Math.random() * 60))
+}, randomInterval())
+
+function randomInterval() {
+  return (5 * 60 + Math.floor(Math.random() * 60)) * 1000
+}
 
 async function doCleanup() {
   await clearLog()
 
   setTimeout(async () => {
     await clearLog()
-  }, 5 * 60 + Math.floor(Math.random() * 60))  
+  }, randomInterval())  
 }
 
 async function clearLog() {
