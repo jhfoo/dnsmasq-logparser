@@ -24,6 +24,7 @@ tail.on('line', (data) => {
 tail.on('error', (err) => {
   console.error('tail.error')
   console.error(err)
+  tail.unwatch()
   checkFileExist()
 })
 
