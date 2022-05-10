@@ -20,12 +20,21 @@ tail.on('line', (data) => {
 })
 
 tail.on('error', (err) => {
+  console.error('tail.error')
   console.error(err)
 })
 
 setTimeout(async () => {
   await clearLog()
 }, 5 * 60 + Math.floor(Math.random() * 60))
+
+async function doCleanup() {
+  await clearLog()
+
+  setTimeout(async () => {
+    await clearLog()
+  }, 5 * 60 + Math.floor(Math.random() * 60))  
+}
 
 async function clearLog() {
   try {
