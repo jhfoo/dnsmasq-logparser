@@ -28,12 +28,14 @@ tail.on('error', (err) => {
 })
 
 function checkFileExist() {
+  console.log(`Monitoring file presence: ${WatchFile}`)
   if (fs.existsSync(WatchFile)) {
+    console.log(`File is present: ${WatchFile}`)
     tail.watch()
   } else {
     setTimeout(() => {
       checkFileExist()
-    }, 500)
+    }, 1 * 1000)
   }
 }
 
