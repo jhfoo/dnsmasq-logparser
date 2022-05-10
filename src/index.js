@@ -1,4 +1,5 @@
-const Tail = require('tail').Tail
+const ChildProcess = require('child_process'),
+  Tail = require('tail').Tail
 
 const DEFAULT_WATCHFILE = '/var/log/dnsmasq.log'
 const WatchFile = process.argv.length > 2 ? process.argv[2] : DEFAULT_WATCHFILE
@@ -21,3 +22,35 @@ tail.on('line', (data) => {
 tail.on('error', (err) => {
   console.error(err)
 })
+
+setTimeout(async () => {
+  await clearLog()
+}, 5 * 60 + Math.floor(Math.random() * 60))
+
+async function clearLog() {
+  try {
+    const stdout = await execWait('service dnsmasq stop')
+    console.log(`stdout: ${stdout}`)
+
+    const stdout = await execWait('rm /var/log/dnsmasq.log')
+    console.log(`stdout: ${stdout}`)
+
+    const stdout = await execWait('service dnsmasq start')
+    console.log(`stdout: ${stdout}`)
+  } catch (err) {
+
+  }
+}
+
+async function execWait(cmd) {
+  return new Promise((resolve, reject) => {
+    ChildProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        reject (err)
+        return
+      }
+
+      resolve(stdout)
+    })
+  })
+}
