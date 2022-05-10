@@ -38,7 +38,7 @@ async function clearLog() {
     stdout = await execWait('service dnsmasq start')
     console.log(`stdout: ${stdout}`)
   } catch (err) {
-
+    console.error(err)
   }
 }
 
