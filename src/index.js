@@ -29,13 +29,13 @@ setTimeout(async () => {
 
 async function clearLog() {
   try {
-    const stdout = await execWait('service dnsmasq stop')
+    let stdout = await execWait('service dnsmasq stop')
     console.log(`stdout: ${stdout}`)
 
-    const stdout = await execWait('rm /var/log/dnsmasq.log')
+    stdout = await execWait('rm /var/log/dnsmasq.log')
     console.log(`stdout: ${stdout}`)
 
-    const stdout = await execWait('service dnsmasq start')
+    stdout = await execWait('service dnsmasq start')
     console.log(`stdout: ${stdout}`)
   } catch (err) {
 
