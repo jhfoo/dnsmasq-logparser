@@ -23,6 +23,8 @@
     "supervisor": "^0.12.0"
   },
   "dependencies": {
+    "moleculer-web": "^0.10.4",
+    "prom-client": "^14.0.1",
     "tail": "^2.2.4"
   }
 }

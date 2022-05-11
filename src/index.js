@@ -1,15 +1,54 @@
 const ChildProcess = require('child_process'),
   fs = require('fs'),
   path = require('path'),
+  { ServiceBroker } = require('moleculer'),
+  ApiGateway = require('moleculer-web'),
+  PromClient = require('prom-client'),
   Tail = require('tail').Tail
 
 const DEFAULT_WATCHFILE = '/var/log/dnsmasq.log'
 const WatchFile = process.argv.length > 2 ? process.argv[2] : DEFAULT_WATCHFILE
 
+const broker = new ServiceBroker()
+const ApiSvc = broker.createService({
+  name: 'api',
+  mixins: [ApiGateway],
+  settings: {
+    port: 3030,
+    ip: '0.0.0.0',
+  },
+  actions: {
+    async clearLog(ctx) {
+      try {
+        let stdout = await execWait('service dnsmasq stop')
+        console.log(`stdout: ${stdout}`)
+    
+        stdout = await execWait('rm /var/log/dnsmasq.log')
+        console.log(`stdout: ${stdout}`)
+    
+        stdout = await execWait('service dnsmasq start')
+        console.log(`stdout: ${stdout}`)
+      } catch (err) {
+        console.error(err)
+        return err.message
+      }    
+    },
+  },
+})
+
+broker.start()
+.catch((err) => {
+  console.error(`Moleculer fatal error: ${err}`)
+})
+
 console.log(`Watch: ${WatchFile}`)
 let tail = new Tail(WatchFile)
 
 initTailEvents(tail)
+
+// setTimeout(async () => {
+//   await clearLog()
+// }, randomInterval())
 
 function initTailEvents(tail) {
   tail.on('line', (data) => {
@@ -45,9 +84,6 @@ function checkFileExist() {
   }
 }
 
-setTimeout(async () => {
-  await clearLog()
-}, randomInterval())
 
 function randomInterval() {
   return (5 * 60 + Math.floor(Math.random() * 60)) * 1000
@@ -59,21 +95,6 @@ async function doCleanup() {
   setTimeout(async () => {
     await clearLog()
   }, randomInterval())  
-}
-
-async function clearLog() {
-  try {
-    let stdout = await execWait('service dnsmasq stop')
-    console.log(`stdout: ${stdout}`)
-
-    stdout = await execWait('rm /var/log/dnsmasq.log')
-    console.log(`stdout: ${stdout}`)
-
-    stdout = await execWait('service dnsmasq start')
-    console.log(`stdout: ${stdout}`)
-  } catch (err) {
-    console.error(err)
-  }
 }
 
 async function execWait(cmd) {
