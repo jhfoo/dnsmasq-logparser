@@ -8,7 +8,10 @@ const ChildProcess = require('child_process'),
 
 const DEFAULT_WATCHFILE = '/var/log/dnsmasq.log'
 const WatchFile = process.argv.length > 2 ? process.argv[2] : DEFAULT_WATCHFILE
-
+let DnsMasqTracker = {
+  total: 0,
+  blocked: 0,
+}
 const broker = new ServiceBroker()
 const ApiSvc = broker.createService({
   name: 'api',
@@ -18,6 +21,33 @@ const ApiSvc = broker.createService({
     ip: '0.0.0.0',
   },
   actions: {
+    async prometheus(ctx) {
+      const gauge = new PromClient.Gauge({
+        name: 'DnsTraffic',
+        help: 'DNS queries',
+        labelNames: ['type'],
+      })
+
+      gauge.set({
+        type: 'total',
+      }, DnsMasqTracker.total)
+      gauge.set({
+        type: 'blocked',
+      }, DnsMasqTracker.blocked)
+
+      // prepare response format
+      ctx.meta.$responseType = 'text/plain'
+      const output = await PromClient.register.metrics()
+
+      // reset metrics
+      PromClient.register.clear()
+      DnsMasqTracker = {
+        total: 0,
+        blocked: 0,
+      }
+
+      return output
+    },
     async clearLog(ctx) {
       try {
         let stdout = await execWait('service dnsmasq stop')
@@ -60,11 +90,13 @@ function initTailEvents(tail) {
   tail.on('line', (data) => {
     let matches = data.match(/query\[A\] (\S+) from (\S+)$/)
     if (matches) {
+      DnsMasqTracker.total++
       console.log(`Query from ${matches[2]}: ${matches[1]}`)
     }
   
     matches = data.match(/config (\S+) is 0.0.0.0/)
     if (matches) {
+      DnsMasqTracker.blocked++
       console.log(`BLOCKED: ${matches[1]}`)
     }
   })
@@ -91,17 +123,17 @@ function checkFileExist() {
 }
 
 
-function randomInterval() {
-  return (5 * 60 + Math.floor(Math.random() * 60)) * 1000
-}
+// function randomInterval() {
+//   return (5 * 60 + Math.floor(Math.random() * 60)) * 1000
+// }
 
-async function doCleanup() {
-  await clearLog()
+// async function doCleanup() {
+//   await clearLog()
 
-  setTimeout(async () => {
-    await clearLog()
-  }, randomInterval())  
-}
+//   setTimeout(async () => {
+//     await clearLog()
+//   }, randomInterval())  
+// }
 
 async function execWait(cmd) {
   return new Promise((resolve, reject) => {
