@@ -28,9 +28,15 @@ const ApiSvc = broker.createService({
     
         stdout = await execWait('service dnsmasq start')
         console.log(`stdout: ${stdout}`)
+        return {
+          status: 'OK'
+        }
       } catch (err) {
         console.error(err)
-        return err.message
+        return {
+          status: 'ERROR',
+          message: err.message,
+        } 
       }    
     },
   },
